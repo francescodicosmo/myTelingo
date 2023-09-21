@@ -143,7 +143,7 @@ class Application:
                 if (sym.name, len(sym.arguments), sym.positive) != sig:
                     _sys.stdout.write("\n ")
                     sig = (sym.name, len(sym.arguments), sym.positive)
-                _sys.stdout.write(" {}".format(sym))
+                _sys.stdout.write(" {}.".format(sym))
         _sys.stdout.write("\n")
         return True
 
