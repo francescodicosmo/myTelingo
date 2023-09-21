@@ -10,8 +10,8 @@ imain -- Function to run the incremetal solving loop.
 main  -- Main function starting an extended clingo application.
 """
 
-from . import transformers as _tf
-from . import theory as _ty
+from telingo import transformers as _tf
+from telingo import theory as _ty
 
 import sys as _sys
 import clingo as _clingo
@@ -133,17 +133,18 @@ class Application:
         for sym in model.symbols(shown=True):
             if sym.type == _clingo.SymbolType.Function and len(sym.arguments) > 0:
                 table.setdefault(sym.arguments[-1].number, []).append(_clingo.Function(sym.name, sym.arguments[:-1], sym.positive))
-        for step in range(self.__horizon+1):
-            symbols = table.get(step, [])
-            _sys.stdout.write(" State {}:".format(step))
-            sig = None
-            for sym in sorted(symbols):
-                if not sym.name.startswith('__'):
-                    if (sym.name, len(sym.arguments), sym.positive) != sig:
-                        _sys.stdout.write("\n ")
-                        sig = (sym.name, len(sym.arguments), sym.positive)
-                    _sys.stdout.write(" {}".format(sym))
-            _sys.stdout.write("\n")
+        #for step in range(self.__horizon+1):
+        step = self.__horizon
+        symbols = table.get(step, [])
+        _sys.stdout.write("State {}:".format(step))
+        sig = None
+        for sym in sorted(symbols):
+            if not sym.name.startswith('__'):
+                if (sym.name, len(sym.arguments), sym.positive) != sig:
+                    _sys.stdout.write("\n ")
+                    sig = (sym.name, len(sym.arguments), sym.positive)
+                _sys.stdout.write(" {}".format(sym))
+        _sys.stdout.write("\n")
         return True
 
     def register_options(self, options):
