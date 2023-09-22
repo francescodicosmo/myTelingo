@@ -17,6 +17,16 @@ import sys as _sys
 import clingo as _clingo
 import clingo.ast as _ast
 import textwrap as _textwrap
+import os
+
+class myCnt():
+    def __init__(self):
+        self.val = 0
+    
+    def incr(self):
+        self.val=self.val +1
+
+runcount = myCnt()
 
 def imain(prg, future_sigs, program_parts, on_model, imin = 0, imax = None, istop = "SAT"):
     """
@@ -129,22 +139,29 @@ class Application:
         return self.__istop in ["SAT", "UNSAT", "UNKNOWN"]
 
     def print_model(self, model, printer):
+        f = open(os.getcwd()+"/runs/run{}.lp".format(runcount.val), "w")
+        _sys.stdout.write("Answer\n")
         table = {}
         for sym in model.symbols(shown=True):
             if sym.type == _clingo.SymbolType.Function and len(sym.arguments) > 0:
                 table.setdefault(sym.arguments[-1].number, []).append(_clingo.Function(sym.name, sym.arguments[:-1], sym.positive))
-        #for step in range(self.__horizon+1):
-        step = self.__horizon
-        symbols = table.get(step, [])
-        _sys.stdout.write("State {}:".format(step))
-        sig = None
-        for sym in sorted(symbols):
-            if not sym.name.startswith('__'):
-                if (sym.name, len(sym.arguments), sym.positive) != sig:
-                    _sys.stdout.write("\n ")
-                    sig = (sym.name, len(sym.arguments), sym.positive)
-                _sys.stdout.write(" {}.".format(sym))
-        _sys.stdout.write("\n")
+        f.write("%Run {}:\n".format(runcount.val))
+        for step in range(self.__horizon+1):
+            symbols = table.get(step, [])
+            _sys.stdout.write("State {}:".format(step))
+            f.write("%State {}:".format(step))
+            sig = None
+            for sym in sorted(symbols):
+                if not sym.name.startswith('__'):
+                    if (sym.name, len(sym.arguments), sym.positive) != sig:
+                        _sys.stdout.write("\n ")
+                        f.write("\n ")
+                        sig = (sym.name, len(sym.arguments), sym.positive)
+                    _sys.stdout.write(" {}.".format(sym))
+                    f.write(" {}.".format(sym))
+            _sys.stdout.write("\n")
+            f.write("\n")
+        runcount.incr()
         return True
 
     def register_options(self, options):
